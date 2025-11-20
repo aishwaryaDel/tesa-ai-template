@@ -3,14 +3,14 @@ import { useCaseController } from '../controllers/useCaseController';
 
 const router = Router();
 
-router.get('/', (req, res) => useCaseController.getAllUseCases(req, res));
+router.get('/', (req, res, next) => useCaseController.getAllUseCases(req, res, next));
 
-router.get('/:id', (req, res) => useCaseController.getUseCaseById(req, res));
+router.get('/:id', (req, res, next) => useCaseController.getUseCaseById(req, res, next));
 
-router.post('/', (req, res) => useCaseController.createUseCase(req, res));
+router.post('/', (req, res, next) => useCaseController.createUseCase(req, res, next));
 
-router.put('/:id', (req, res) => useCaseController.updateUseCase(req, res));
+router.put('/:id', (req, res, next) => useCaseController.updateUseCase(req, res, next));
 
-router.delete('/:id', (req, res) => useCaseController.deleteUseCase(req, res));
+router.delete('/:id', (req, res, next) => useCaseController.deleteUseCase(req, res, next));
 
 export default router;

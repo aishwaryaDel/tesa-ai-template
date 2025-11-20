@@ -1,12 +1,11 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { useCaseService } from '../services/useCaseService';
 import { CreateUseCaseDTO, UpdateUseCaseDTO } from '../models/UseCase';
-
-const VALID_STATUSES = ['Ideation', 'Pre-Evaluation', 'Evaluation', 'PoC', 'MVP', 'Live', 'Archived'];
-const VALID_DEPARTMENTS = ['Marketing', 'R&D', 'Procurement', 'IT', 'HR', 'Operations'];
+import { AppError } from '../utils/AppError';
+import { VALID_STATUSES, VALID_DEPARTMENTS } from '../config';
 
 export class UseCaseController {
-  async getAllUseCases(req: Request, res: Response): Promise<void> {
+  async getAllUseCases(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const useCases = await useCaseService.getAllUseCases();
       res.status(200).json({
@@ -15,33 +14,22 @@ export class UseCaseController {
         count: useCases.length,
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch use cases',
-      });
+      next(error);
     }
   }
 
-  async getUseCaseById(req: Request, res: Response): Promise<void> {
+  async getUseCaseById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
 
       if (!id) {
-        res.status(400).json({
-          success: false,
-          error: 'Use case ID is required',
-        });
-        return;
+        throw AppError.badRequest('Use case ID is required');
       }
 
       const useCase = await useCaseService.getUseCaseById(id);
 
       if (!useCase) {
-        res.status(404).json({
-          success: false,
-          error: 'Use case not found',
-        });
-        return;
+        throw AppError.notFound('Use case not found');
       }
 
       res.status(200).json({
@@ -49,24 +37,17 @@ export class UseCaseController {
         data: useCase,
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch use case',
-      });
+      next(error);
     }
   }
 
-  async createUseCase(req: Request, res: Response): Promise<void> {
+  async createUseCase(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const useCaseData: CreateUseCaseDTO = req.body;
 
       const validationError = this.validateUseCaseData(useCaseData);
       if (validationError) {
-        res.status(400).json({
-          success: false,
-          error: validationError,
-        });
-        return;
+        throw AppError.badRequest(validationError);
       }
 
       const newUseCase = await useCaseService.createUseCase(useCaseData);
@@ -77,51 +58,32 @@ export class UseCaseController {
         message: 'Use case created successfully',
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to create use case',
-      });
+      next(error);
     }
   }
 
-  async updateUseCase(req: Request, res: Response): Promise<void> {
+  async updateUseCase(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
       const updates: UpdateUseCaseDTO = req.body;
 
       if (!id) {
-        res.status(400).json({
-          success: false,
-          error: 'Use case ID is required',
-        });
-        return;
+        throw AppError.badRequest('Use case ID is required');
       }
 
       if (Object.keys(updates).length === 0) {
-        res.status(400).json({
-          success: false,
-          error: 'No update data provided',
-        });
-        return;
+        throw AppError.badRequest('No update data provided');
       }
 
       const validationError = this.validateUpdateData(updates);
       if (validationError) {
-        res.status(400).json({
-          success: false,
-          error: validationError,
-        });
-        return;
+        throw AppError.badRequest(validationError);
       }
 
       const updatedUseCase = await useCaseService.updateUseCase(id, updates);
 
       if (!updatedUseCase) {
-        res.status(404).json({
-          success: false,
-          error: 'Use case not found',
-        });
-        return;
+        throw AppError.notFound('Use case not found');
       }
 
       res.status(200).json({
@@ -130,45 +92,30 @@ export class UseCaseController {
         message: 'Use case updated successfully',
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to update use case',
-      });
+      next(error);
     }
   }
 
-  async deleteUseCase(req: Request, res: Response): Promise<void> {
+  async deleteUseCase(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
 
       if (!id) {
-        res.status(400).json({
-          success: false,
-          error: 'Use case ID is required',
-        });
-        return;
+        throw AppError.badRequest('Use case ID is required');
       }
 
-      const useCase = await useCaseService.getUseCaseById(id);
-      if (!useCase) {
-        res.status(404).json({
-          success: false,
-          error: 'Use case not found',
-        });
-        return;
-      }
+      const deleted = await useCaseService.deleteUseCase(id);
 
-      await useCaseService.deleteUseCase(id);
+      if (!deleted) {
+        throw AppError.notFound('Use case not found');
+      }
 
       res.status(200).json({
         success: true,
         message: 'Use case deleted successfully',
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to delete use case',
-      });
+      next(error);
     }
   }
 
