@@ -1,14 +1,12 @@
+import { useCaseRepository } from '../repository/useCase.repository';
 import { eventGridAdapter } from '../adapters/event-grid.adapter';
 import { UseCase, CreateUseCaseDTO, UpdateUseCaseDTO } from '../models/UseCase';
 import { AppError } from '../utils/AppError';
 
-const useCases: UseCase[] = [];
-let idCounter = 1;
-
 export class UseCaseService {
   async getAllUseCases(): Promise<UseCase[]> {
     try {
-      return useCases;
+      return await useCaseRepository.findAll();
     } catch (error) {
       throw AppError.internal('Failed to fetch use cases');
     }
@@ -16,7 +14,7 @@ export class UseCaseService {
 
   async getUseCaseById(id: string): Promise<UseCase | null> {
     try {
-      return useCases.find(uc => uc.id === id) || null;
+      return await useCaseRepository.findById(id);
     } catch (error) {
       throw AppError.internal('Failed to fetch use case');
     }
@@ -24,15 +22,7 @@ export class UseCaseService {
 
   async createUseCase(useCaseData: CreateUseCaseDTO): Promise<UseCase> {
     try {
-      const newUseCase: UseCase = {
-        ...useCaseData,
-        id: String(idCounter++),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        related_use_case_ids: useCaseData.related_use_case_ids || [],
-      };
-
-      useCases.push(newUseCase);
+      const newUseCase = await useCaseRepository.create(useCaseData);
 
       await eventGridAdapter.publish('useCase.created', {
         id: newUseCase.id,
@@ -49,25 +39,20 @@ export class UseCaseService {
 
   async updateUseCase(id: string, updates: UpdateUseCaseDTO): Promise<UseCase | null> {
     try {
-      const index = useCases.findIndex(uc => uc.id === id);
-
-      if (index === -1) {
+      const existingUseCase = await useCaseRepository.findById(id);
+      if (!existingUseCase) {
         return null;
       }
 
-      const updatedUseCase: UseCase = {
-        ...useCases[index],
-        ...updates,
-        updated_at: new Date().toISOString(),
-      };
+      const updatedUseCase = await useCaseRepository.update(id, updates);
 
-      useCases[index] = updatedUseCase;
-
-      await eventGridAdapter.publish('useCase.updated', {
-        id: updatedUseCase.id,
-        title: updatedUseCase.title,
-        changes: updates,
-      });
+      if (updatedUseCase) {
+        await eventGridAdapter.publish('useCase.updated', {
+          id: updatedUseCase.id,
+          title: updatedUseCase.title,
+          changes: updates,
+        });
+      }
 
       return updatedUseCase;
     } catch (error) {
@@ -77,21 +62,21 @@ export class UseCaseService {
 
   async deleteUseCase(id: string): Promise<boolean> {
     try {
-      const index = useCases.findIndex(uc => uc.id === id);
-
-      if (index === -1) {
+      const useCase = await useCaseRepository.findById(id);
+      if (!useCase) {
         return false;
       }
 
-      const useCase = useCases[index];
-      useCases.splice(index, 1);
+      const deleted = await useCaseRepository.delete(id);
 
-      await eventGridAdapter.publish('useCase.deleted', {
-        id,
-        title: useCase.title,
-      });
+      if (deleted) {
+        await eventGridAdapter.publish('useCase.deleted', {
+          id,
+          title: useCase.title,
+        });
+      }
 
-      return true;
+      return deleted;
     } catch (error) {
       throw AppError.internal('Failed to delete use case');
     }
