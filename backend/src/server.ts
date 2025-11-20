@@ -4,7 +4,6 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import useCaseRoutes from './routes/useCaseRoutes';
 import { errorHandler } from './middlewares/errorHandler';
-import { dbAdapter } from './adapters/db.adapter';
 import { APP_CONFIG } from './config';
 
 dotenv.config();
@@ -25,13 +24,6 @@ app.use(errorHandler);
 
 const PORT = APP_CONFIG.PORT;
 
-dbAdapter.connect()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`✅ Server läuft auf Port ${PORT}`);
-    });
-  })
-  .catch((error) => {
-    console.error('Failed to start server:', error);
-    process.exit(1);
-  });
+app.listen(PORT, () => {
+  console.log(`✅ Server läuft auf Port ${PORT}`);
+});
