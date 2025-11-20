@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Department, UseCaseStatus } from '../types';
-import { useLanguage } from '../contexts/LanguageContext';
+import { Department, UseCaseStatus } from '../../types';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface NewUseCaseModalProps {
   onClose: () => void;

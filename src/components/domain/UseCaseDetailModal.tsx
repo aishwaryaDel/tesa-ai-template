@@ -1,6 +1,6 @@
 import { X } from 'lucide-react';
-import { UseCase } from '../types';
-import { useLanguage } from '../contexts/LanguageContext';
+import { UseCase } from '../../types';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface UseCaseDetailModalProps {
   useCase: UseCase;

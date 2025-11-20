@@ -1,4 +1,4 @@
-import { UseCase } from '../types';
+import { UseCase } from '../../types';
 
 interface UseCaseCardProps {
   useCase: UseCase;

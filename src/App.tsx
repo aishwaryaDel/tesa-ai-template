@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import LandingPage from './components/LandingPage';
-import UseCaseOverview from './components/UseCaseOverview';
+import LandingPage from './pages/LandingPage';
+import UseCaseOverview from './pages/UseCaseOverview';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { UseCase } from './types';
 import { useCaseApi } from './services/api';

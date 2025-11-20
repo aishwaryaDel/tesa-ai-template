@@ -1,5 +1,5 @@
 import { useLanguage } from '../contexts/LanguageContext';
-import LanguageSwitcher from './LanguageSwitcher';
+import LanguageSwitcher from '../components/common/LanguageSwitcher';
 
 interface LandingPageProps {
   onStartJourney: () => void;

@@ -2,12 +2,12 @@ import { useState, useMemo } from 'react';
 import { useCaseApi } from '../services/api';
 import { Search, Home, Plus } from 'lucide-react';
 import { UseCase, Department, UseCaseStatus } from '../types';
-import UseCaseCard from './UseCaseCard';
-import UseCaseDetailModal from './UseCaseDetailModal';
-import NewUseCaseModal, { NewUseCaseData } from './NewUseCaseModal';
-import Footer from './Footer';
+import UseCaseCard from '../components/domain/UseCaseCard';
+import UseCaseDetailModal from '../components/domain/UseCaseDetailModal';
+import NewUseCaseModal, { NewUseCaseData } from '../components/domain/NewUseCaseModal';
+import Footer from '../components/layout/Footer';
 import { useLanguage } from '../contexts/LanguageContext';
-import LanguageSwitcher from './LanguageSwitcher';
+import LanguageSwitcher from '../components/common/LanguageSwitcher';
 
 interface UseCaseOverviewProps {
   useCases: UseCase[];
